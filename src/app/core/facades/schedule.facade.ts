@@ -1,6 +1,4 @@
 import { Injectable, signal, inject } from "@angular/core";
-import type { ApiStrategy } from "../strategies/api-strategy.interface";
-import { MockApiStrategy } from "../strategies/mock-api.strategy";
 import {
   type ScheduleRequest,
   type ScheduleResponse,
@@ -8,12 +6,16 @@ import {
   type ClassSchedule,
 } from "../models/schedule.model";
 import { ScheduleLogicService } from "../services/schedule-logic.service";
+import {
+  ScheduleService,
+  ScheduleStrategy,
+} from "../services/schedule.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class ScheduleFacade {
-  private apiStrategy: ApiStrategy;
+  private strategy: ScheduleStrategy;
 
   private scheduleSignal = signal<WeeklySchedule | null>(null);
   private loadingSignal = signal<boolean>(false);
@@ -28,12 +30,10 @@ export class ScheduleFacade {
     this.currentOrNextClassSignal.asReadonly();
   public readonly isCurrentClass = this.isCurrentClassSignal.asReadonly();
 
-  private mockApiStrategy = inject(MockApiStrategy);
   private scheduleLogicService = inject(ScheduleLogicService);
 
-
   constructor() {
-    this.apiStrategy = this.mockApiStrategy;
+    this.strategy = inject(ScheduleService);
   }
 
   public fetchStudentSchedule(studentId: string): void {
@@ -42,7 +42,7 @@ export class ScheduleFacade {
 
     const request: ScheduleRequest = { studentId };
 
-    this.apiStrategy.getStudentSchedule(request).subscribe({
+    this.strategy.getStudentSchedule(request).subscribe({
       next: (response: ScheduleResponse) => {
         if (response.success) {
           this.scheduleSignal.set(response.data);
@@ -63,5 +63,10 @@ export class ScheduleFacade {
     const result = this.scheduleLogicService.updateCurrentOrNextClass(schedule);
     this.currentOrNextClassSignal.set(result.currentOrNextClass);
     this.isCurrentClassSignal.set(result.isCurrentClass);
+  }
+
+  // Method to change strategy at runtime if needed
+  setStrategy(strategy: ScheduleStrategy): void {
+    this.strategy = strategy;
   }
 }
