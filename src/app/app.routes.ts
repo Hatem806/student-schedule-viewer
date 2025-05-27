@@ -12,6 +12,11 @@ export const routes: Routes = [
       import("./features/schedule-viewer/schedule-viewer.component").then((m) => m.ScheduleViewerComponent),
   },
   {
+    path: "explore",
+    loadComponent: () =>
+      import("./features/explore/explore.component").then((m) => m.ExploreComponent),
+  },
+  {
     path: "**",
     redirectTo: "",
   },
