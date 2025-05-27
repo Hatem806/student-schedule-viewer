@@ -26,7 +26,9 @@ import { Router } from "@angular/router"
               placeholder="Enter your student ID"
               required
             />
-            <p *ngIf="error()" class="mt-2 text-sm text-red-600">{{ error() }}</p>
+            @if (error()) {
+              <p class="mt-2 text-sm text-red-600">{{ error() }}</p>
+            }
             <p class="mt-2 text-xs text-gray-500">
               Try with sample IDs: 12345 or 67890
             </p>

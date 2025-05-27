@@ -28,49 +28,39 @@ import type { ClassSchedule } from "../../core/models/schedule.model";
         </button>
       </div>
 
-      <div
-        *ngIf="scheduleFacade.loading()"
-        class="flex justify-center items-center py-12"
-      >
-        <div
-          class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"
-        ></div>
-      </div>
+      @if (scheduleFacade.loading()) {
+        <div class="flex justify-center items-center py-12">
+          <div
+            class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"
+          ></div>
+        </div>
+      }
 
-      <div
-        *ngIf="scheduleFacade.error()"
-        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
-      >
-        {{ scheduleFacade.error() }}
-      </div>
+      @if (scheduleFacade.error()) {
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {{ scheduleFacade.error() }}
+        </div>
+      }
 
-      <div
-        *ngIf="
-          !scheduleFacade.loading() &&
-          !scheduleFacade.error() &&
-          scheduleFacade.schedule()
-        "
-      >
+      @if (!scheduleFacade.loading() && !scheduleFacade.error() && scheduleFacade.schedule()) {
         <div class="mb-4 p-4 bg-primary rounded-lg">
           <p class="text-lg">
             <span class="font-semibold">Student ID:</span>
             {{ scheduleFacade.schedule()?.studentId }}
           </p>
-          <p *ngIf="scheduleFacade.currentOrNextClass()" class="mt-2">
-            <span class="font-semibold">
-              {{
-                scheduleFacade.isCurrentClass()
-                  ? "Current Class:"
-                  : "Next Class:"
-              }}
-            </span>
-            <span class="ml-2 text-blue-600 font-medium">
-              {{ scheduleFacade.currentOrNextClass()?.name }}
-              ({{ scheduleFacade.currentOrNextClass()?.day }},
-              {{ scheduleFacade.currentOrNextClass()?.startTime }} -
-              {{ scheduleFacade.currentOrNextClass()?.endTime }})
-            </span>
-          </p>
+          @if (scheduleFacade.currentOrNextClass()) {
+            <p class="mt-2">
+              <span class="font-semibold">
+                {{ scheduleFacade.isCurrentClass() ? "Current Class:" : "Next Class:" }}
+              </span>
+              <span class="ml-2 text-blue-600 font-medium">
+                {{ scheduleFacade.currentOrNextClass()?.name }}
+                ({{ scheduleFacade.currentOrNextClass()?.day }},
+                {{ scheduleFacade.currentOrNextClass()?.startTime }} -
+                {{ scheduleFacade.currentOrNextClass()?.endTime }})
+              </span>
+            </p>
+          }
         </div>
 
         <div class="overflow-x-auto">
@@ -105,30 +95,32 @@ import type { ClassSchedule } from "../../core/models/schedule.model";
               </tr>
             </thead>
             <tbody>
-              <tr
-                *ngFor="let class of scheduleFacade.schedule()?.classes"
-                [ngClass]="{
-                  'bg-blue-500': isHighlighted(class),
-                }"
-                class="hover:bg-gray-300 transition-colors"
-              >
-                <td class="py-3 px-4 border-b">{{ class.day }}</td>
-                <td class="py-3 px-4 border-b">
-                  {{ class.startTime }} - {{ class.endTime }}
-                </td>
-                <td class="py-3 px-4 border-b font-medium">{{ class.name }}</td>
-                <td class="py-3 px-4 border-b">{{ class.room }}</td>
-                <td class="py-3 px-4 border-b">{{ class.professor }}</td>
-              </tr>
-              <tr *ngIf="scheduleFacade.schedule()?.classes?.length === 0">
-                <td colspan="5" class="py-4 px-4 text-center text-gray-500">
-                  No classes scheduled
-                </td>
-              </tr>
+              @for (class of scheduleFacade.schedule()?.classes ?? []; track class.id) {
+                <tr
+                  [ngClass]="{
+                    'bg-blue-500': isHighlighted(class),
+                  }"
+                  class="hover:bg-gray-300 transition-colors"
+                >
+                  <td class="py-3 px-4 border-b">{{ class.day }}</td>
+                  <td class="py-3 px-4 border-b">
+                    {{ class.startTime }} - {{ class.endTime }}
+                  </td>
+                  <td class="py-3 px-4 border-b font-medium">{{ class.name }}</td>
+                  <td class="py-3 px-4 border-b">{{ class.room }}</td>
+                  <td class="py-3 px-4 border-b">{{ class.professor }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="py-4 px-4 text-center text-gray-500">
+                    No classes scheduled
+                  </td>
+                </tr>
+              }
             </tbody>
           </table>
         </div>
-      </div>
+      }
     </div>
   `,
 })
